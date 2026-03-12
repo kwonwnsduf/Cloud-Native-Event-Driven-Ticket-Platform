@@ -4,8 +4,10 @@ import com.ticketplatform.reservation_service.domain.Reservation;
 import com.ticketplatform.reservation_service.domain.ReservationStatus;
 import com.ticketplatform.reservation_service.dto.CreateReservationRequest;
 import com.ticketplatform.reservation_service.dto.ReservationResponse;
+import com.ticketplatform.reservation_service.event.ReservationCreatedEvent;
 import com.ticketplatform.reservation_service.exception.DuplicateReservationException;
 import com.ticketplatform.reservation_service.exception.ReservationNotFoundException;
+import com.ticketplatform.reservation_service.producer.ReservationEventProducer;
 import com.ticketplatform.reservation_service.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
-
+    private final ReservationEventProducer reservationEventProducer;
     @Transactional
     public ReservationResponse createReservation(CreateReservationRequest request) {
         validateRequest(request);
@@ -41,6 +43,14 @@ public class ReservationService {
 
         try {
             Reservation saved = reservationRepository.save(reservation);
+            ReservationCreatedEvent event = new ReservationCreatedEvent(
+                    saved.getId(),
+                    saved.getUserId(),
+                    saved.getEventId(),
+                    saved.getSeatNumber()
+            );
+            reservationEventProducer.sendReservationCreated(event);
+
             return ReservationResponse.from(saved);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateReservationException("동시에 같은 좌석 예약이 시도되어 예약에 실패했습니다.");
