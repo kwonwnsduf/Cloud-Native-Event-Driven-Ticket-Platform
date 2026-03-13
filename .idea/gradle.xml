@@ -36,16 +36,6 @@
       <GradleProjectSettings>
         <option name="delegatedBuild" value="false" />
         <option name="testRunner" value="PLATFORM" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/services/payment-service/payment-service" />
-        <option name="modules">
-          <set>
-            <option value="$PROJECT_DIR$/services/payment-service/payment-service" />
-          </set>
-        </option>
-      </GradleProjectSettings>
-      <GradleProjectSettings>
-        <option name="delegatedBuild" value="false" />
-        <option name="testRunner" value="PLATFORM" />
         <option name="externalProjectPath" value="$PROJECT_DIR$/services/reservation-service" />
         <option name="modules">
           <set>

@@ -1,6 +1,6 @@
 package com.ticketplatform.payment_service.config;
 
-import com.ticketplatform.payment_service.event.PaymentCompletedEvent;
+import com.ticketplatform.payment_service.event.ReservationCreatedEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,28 +20,24 @@ public class KafkaConsumerConfig {
     private String bootstrapServers;
 
     @Bean
-    public ConsumerFactory<String, Object> consumerFactory() {
-        JacksonJsonDeserializer<Object> deserializer = new JacksonJsonDeserializer<>();
+    public ConsumerFactory<String, ReservationCreatedEvent> consumerFactory() {
+        JacksonJsonDeserializer<ReservationCreatedEvent> deserializer = new JacksonJsonDeserializer<>(ReservationCreatedEvent.class);
         deserializer.addTrustedPackages("*");
-
-        Map<String, Object> config = new HashMap<>();
-        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "notification-group");
-        config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-
-        return new DefaultKafkaConsumerFactory<>(
-                config,
-                new StringDeserializer(),
-                deserializer
-        );
+        deserializer.setUseTypeHeaders(false);
+        
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-group");
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, PaymentCompletedEvent> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, PaymentCompletedEvent> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory((ConsumerFactory) consumerFactory());
+    @Bean(name = "kafkaListenerContainerFactory")
+    public ConcurrentKafkaListenerContainerFactory<String, ReservationCreatedEvent> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ReservationCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
         return factory;
     }
 }

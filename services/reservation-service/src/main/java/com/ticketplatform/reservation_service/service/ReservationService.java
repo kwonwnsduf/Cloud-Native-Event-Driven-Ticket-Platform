@@ -47,7 +47,8 @@ public class ReservationService {
                     saved.getId(),
                     saved.getUserId(),
                     saved.getEventId(),
-                    saved.getSeatNumber()
+                    saved.getSeatNumber(),
+                    request.amount()
             );
             reservationEventProducer.sendReservationCreated(event);
 

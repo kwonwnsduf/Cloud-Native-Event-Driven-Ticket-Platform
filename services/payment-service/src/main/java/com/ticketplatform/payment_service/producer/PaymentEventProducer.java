@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class PaymentEventProducer {
     private static final String TOPIC = "payment-completed";
 
-    private final KafkaTemplate<Object, Object> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void sendPaymentCompleted(PaymentCompletedEvent event) {
         try {
