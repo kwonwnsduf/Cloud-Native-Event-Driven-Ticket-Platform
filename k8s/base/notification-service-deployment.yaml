@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: ticket-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: kwonjunyeol/notification-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8088
+          envFrom:
+            - configMapRef:
+                name: ticket-platform-config
+            - secretRef:
+                name: ticket-platform-secret
