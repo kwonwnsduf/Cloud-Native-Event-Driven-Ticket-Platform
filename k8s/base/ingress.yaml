@@ -8,7 +8,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /api/users
+          - path: /users
             pathType: Prefix
             backend:
               service:
@@ -16,7 +16,7 @@ spec:
                 port:
                   number: 8081
 
-          - path: /api/events
+          - path: /events
             pathType: Prefix
             backend:
               service:
@@ -24,7 +24,7 @@ spec:
                 port:
                   number: 8082
 
-          - path: /api/reservations
+          - path: /reservations
             pathType: Prefix
             backend:
               service:
@@ -32,7 +32,7 @@ spec:
                 port:
                   number: 8087
 
-          - path: /api/payments
+          - path: /payments
             pathType: Prefix
             backend:
               service:
@@ -40,7 +40,7 @@ spec:
                 port:
                   number: 8089
 
-          - path: /api/notifications
+          - path: /notifications
             pathType: Prefix
             backend:
               service:
