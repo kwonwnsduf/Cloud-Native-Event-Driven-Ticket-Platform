@@ -1,23 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user-service
+  name: event-service
   namespace: ticket-dev
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: user-service
+      app: event-service
   template:
     metadata:
       labels:
-        app: user-service
+        app: event-service
     spec:
       containers:
-        - name: user-service
-          image: kwonjunyeol/user-service:latest
+        - name: event-service
+          image: kwonjunyeol/event-service:latest
+          imagePullPolicy: Always
+
           ports:
-            - containerPort: 8081
+            - containerPort: 8082
+
           envFrom:
             - configMapRef:
                 name: ticket-platform-config
