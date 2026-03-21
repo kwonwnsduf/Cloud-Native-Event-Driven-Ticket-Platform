@@ -7,8 +7,10 @@ import com.ticketplatform.notification_service.event.PaymentCompletedEvent;
 import com.ticketplatform.notification_service.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+@Profile("!test")
 
 @Component
 @RequiredArgsConstructor
