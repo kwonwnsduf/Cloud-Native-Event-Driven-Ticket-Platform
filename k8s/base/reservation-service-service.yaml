@@ -3,12 +3,15 @@ kind: Service
 metadata:
   name: reservation-service
   namespace: ticket-dev
+  labels:
+    app: reservation-service   # 👈 추가
 spec:
   selector:
     app: reservation-service
 
   ports:
-    - protocol: TCP
+    - name: http               # 👈 추가 (핵심🔥)
+      protocol: TCP
       port: 8087
       targetPort: 8087
 

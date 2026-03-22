@@ -3,13 +3,14 @@ kind: Service
 metadata:
   name: event-service
   namespace: ticket-dev
+  labels:
+    app: event-service
 spec:
   selector:
     app: event-service
-
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 8082
       targetPort: 8082
-
   type: ClusterIP

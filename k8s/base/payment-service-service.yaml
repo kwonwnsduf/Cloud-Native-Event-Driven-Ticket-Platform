@@ -3,11 +3,14 @@ kind: Service
 metadata:
   name: payment-service
   namespace: ticket-dev
+  labels:
+    app: payment-service   # 👈 추가
 spec:
   selector:
     app: payment-service
   ports:
-    - protocol: TCP
+    - name: http           # 👈 추가 (핵심🔥)
+      protocol: TCP
       port: 8089
       targetPort: 8089
   type: ClusterIP

@@ -3,11 +3,14 @@ kind: Service
 metadata:
   name: notification-service
   namespace: ticket-dev
+  labels:
+    app: notification-service   # 👈 추가
 spec:
   selector:
     app: notification-service
   ports:
-    - protocol: TCP
+    - name: http               # 👈 추가 (핵심🔥)
+      protocol: TCP
       port: 8088
       targetPort: 8088
   type: ClusterIP
