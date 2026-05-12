@@ -1,0 +1,929 @@
+# Cloud-Native Event-Driven Ticket Platform
+
+> AWS ALB + Multi EC2 + Kubernetes(k3s) + Event-Driven Architecture 기반의
+> Production-Style Cloud-Native Ticket Reservation Platform
+
+---
+
+# Table of Contents
+
+- [1. Project Overview](#1-project-overview)
+- [2. Main Goals](#2-main-goals)
+- [3. Tech Stack](#3-tech-stack)
+- [4. System Architecture](#4-system-architecture)
+- [5. Kubernetes Cluster Architecture](#5-kubernetes-cluster-architecture)
+- [6. AWS Infrastructure](#6-aws-infrastructure)
+- [7. Microservices](#7-microservices)
+- [8. Event-Driven Architecture](#8-event-driven-architecture)
+- [9. Kubernetes Operations](#9-kubernetes-operations)
+- [10. CI/CD Pipeline](#10-cicd-pipeline)
+- [11. Monitoring & Logging](#11-monitoring--logging)
+- [12. High Availability & Scaling](#12-high-availability--scaling)
+- [13. Performance Testing](#13-performance-testing)
+- [14. 장애 대응 전략](#14-장애-대응-전략)
+- [15. 트러블 슈팅](#15-트러블-슈팅)
+- [16. 개선 방향](#16-개선-방향)
+- [17. 프로젝트 회고](#17-프로젝트-회고)
+
+---
+
+# 1. Project Overview
+
+대규모 티켓 오픈 상황을 가정하여 구축한
+Production-Style Cloud-Native Event-Driven Platform 입니다.
+
+단순 CRUD 수준이 아닌:
+
+- Kubernetes Cluster 운영
+- Multi Node Architecture
+- AWS Load Balancer 기반 분산 처리
+- Event-Driven Architecture
+- CI/CD 자동화
+- Monitoring / Logging
+- Auto Scaling
+- 장애 대응 전략
+
+까지 포함한 실제 운영 환경 수준의 아키텍처를 목표로 설계하였습니다.
+
+---
+
+# 2. Main Goals
+
+# 목표
+
+## 1. Kubernetes 기반 MSA 운영
+
+- Multi Node Kubernetes Cluster 운영
+- Pod Scheduling
+- Self-Healing
+- Service Discovery
+- Rolling Update
+
+---
+
+## 2. AWS 기반 Production Infrastructure 구축
+
+- ALB 기반 트래픽 분산
+- Multi EC2 Node 구성
+- Multi-AZ RDS
+- Private Network 기반 통신
+
+---
+
+## 3. Event-Driven Architecture 구축
+
+- Kafka 기반 비동기 이벤트 처리
+- 서비스 간 Loose Coupling
+- 비동기 결제/알림 처리
+
+---
+
+## 4. DevOps 자동화
+
+- GitHub Actions 기반 CI/CD
+- Docker 자동 Build/Push
+- Kubernetes 자동 배포
+
+---
+
+## 5. Observability 구축
+
+- Prometheus
+- Grafana
+- Loki
+- Promtail
+
+---
+
+## 6. 대규모 트래픽 대응
+
+- HPA 기반 Auto Scaling
+- 부하 테스트
+- 병목 분석
+- Scale-Out 테스트
+
+---
+
+# 3. Tech Stack
+
+# Backend
+
+| Category | Tech |
+|---|---|
+| Language | Java 17 |
+| Framework | Spring Boot 4.x |
+| ORM | Spring Data JPA |
+| Persistence | Hibernate |
+| Database | PostgreSQL |
+| Cache | Redis |
+
+---
+
+# Infrastructure
+
+| Category | Tech |
+|---|---|
+| Cloud | AWS |
+| Load Balancer | AWS ALB |
+| Compute | EC2 |
+| Database | AWS RDS PostgreSQL |
+| Network | VPC |
+| IAM | AWS IAM |
+| Secret Management | AWS Parameter Store |
+
+---
+
+# Kubernetes
+
+| Category | Tech |
+|---|---|
+| Kubernetes | k3s |
+| Ingress | Traefik |
+| Auto Scaling | HPA |
+| Config Management | ConfigMap |
+| Secret Management | Secret |
+
+---
+
+# Event Streaming
+
+| Category | Tech |
+|---|---|
+| Event Broker | Redpanda |
+| Kafka API | Kafka Compatible |
+
+---
+
+# CI/CD
+
+| Category | Tech |
+|---|---|
+| CI/CD | GitHub Actions |
+| Image Registry | DockerHub |
+| Deployment | kubectl remote deploy |
+
+---
+
+# Monitoring
+
+| Category | Tech |
+|---|---|
+| Metrics | Prometheus |
+| Dashboard | Grafana |
+| Log Aggregation | Loki |
+| Log Collector | Promtail |
+
+---
+
+# Performance Testing
+
+| Category | Tech |
+|---|---|
+| Load Test | k6 |
+
+---
+
+# 4. System Architecture
+
+# 전체 구조
+
+```text
+Internet
+    ↓
+AWS ALB
+    ↓
+Ingress Controller (Traefik)
+    ↓
+Kubernetes Cluster (k3s)
+
+┌────────────────────────────┐
+│        Master Node         │
+│        EC2 Instance        │
+└────────────────────────────┘
+              ↓
+
+┌────────────────────────────┐
+│       Worker Node A        │
+│        EC2 Instance        │
+└────────────────────────────┘
+
+┌────────────────────────────┐
+│       Worker Node B        │
+│        EC2 Instance        │
+└────────────────────────────┘
+
+              ↓
+
+      Kubernetes Pods
+
+    ├── user-service
+    ├── event-service
+    ├── reservation-service
+    ├── payment-service
+    ├── notification-service
+    ├── redis
+    ├── redpanda
+    ├── prometheus
+    ├── grafana
+    └── loki
+
+              ↓
+
+      AWS RDS PostgreSQL
+          (Multi-AZ)
+```
+
+---
+
+# Architecture 특징
+
+- AWS ALB 기반 외부 트래픽 분산
+- Multi EC2 기반 Kubernetes Cluster
+- Kubernetes Self-Healing
+- Event-Driven 비동기 구조
+- HPA 기반 Auto Scaling
+- Multi-AZ RDS 기반 고가용성
+
+---
+
+# 5. Kubernetes Cluster Architecture
+
+# Cluster 구성
+
+| Node | Role |
+|---|---|
+| Master Node | Control Plane |
+| Worker Node A | Application Workload |
+| Worker Node B | Application Workload |
+
+---
+
+# Kubernetes Scheduling
+
+Kubernetes Scheduler가:
+
+- CPU Usage
+- Memory Usage
+- Node 상태
+
+를 기준으로 자동으로 Pod를 배치합니다.
+
+---
+
+# Self-Healing
+
+특정 Worker Node 장애 발생 시:
+
+```text
+Pod 자동 재생성
+↓
+다른 Worker Node로 재배치
+```
+
+---
+
+# High Availability
+
+특정 Node 장애 시에도:
+
+- 다른 Node에서 서비스 유지 가능
+- Kubernetes가 자동 복구 수행
+
+---
+
+# 6. AWS Infrastructure
+
+# VPC
+
+```text
+10.0.0.0/16
+```
+
+---
+
+# Subnet Architecture
+
+| Type | AZ | CIDR |
+|---|---|---|
+| Public Subnet A | ap-northeast-2a | 10.0.1.0/24 |
+| Public Subnet C | ap-northeast-2c | 10.0.2.0/24 |
+| Private Subnet A | ap-northeast-2a | 10.0.3.0/24 |
+| Private Subnet C | ap-northeast-2c | 10.0.4.0/24 |
+
+---
+
+# ALB
+
+AWS ALB(Application Load Balancer)를 이용하여:
+
+- 외부 HTTP 요청 수신
+- Kubernetes Ingress로 전달
+- 트래픽 분산 처리
+
+구조를 구성하였습니다.
+
+---
+
+# Security Group
+
+## ALB
+
+- 80
+- 443
+
+허용
+
+---
+
+## EC2 Worker Node
+
+- NodePort
+- SSH
+- Cluster 통신 허용
+
+---
+
+## RDS
+
+- PostgreSQL 5432
+- Worker Node SG만 허용
+
+---
+
+# RDS
+
+- PostgreSQL
+- Multi-AZ 구성
+- Private Network 기반 연결
+
+---
+
+# Parameter Store
+
+민감 정보 관리:
+
+```text
+/ticket-platform/prod/db/username
+/ticket-platform/prod/db/password
+```
+
+---
+
+# 7. Microservices
+
+| Service | Description | Port |
+|---|---|---|
+| user-service | 사용자 관리 | 8081 |
+| event-service | 이벤트 관리 | 8082 |
+| reservation-service | 예약 처리 | 8087 |
+| payment-service | 결제 처리 | 8089 |
+| notification-service | 알림 처리 | 8088 |
+
+---
+
+# Service Responsibilities
+
+# user-service
+
+- 회원 가입
+- 사용자 조회
+- 인증 처리
+
+---
+
+# event-service
+
+- 이벤트 생성
+- 이벤트 조회
+- 티켓 관리
+
+---
+
+# reservation-service
+
+- 예약 생성
+- 예약 상태 저장
+- 이벤트 발행
+
+---
+
+# payment-service
+
+- 결제 처리
+- 결제 상태 관리
+- 결제 이벤트 발행
+
+---
+
+# notification-service
+
+- 알림 처리
+- 비동기 이벤트 소비
+
+---
+
+# 8. Event-Driven Architecture
+
+# 전체 흐름
+
+```text
+Client
+  ↓
+AWS ALB
+  ↓
+Ingress Controller
+  ↓
+reservation-service
+  ↓
+DB 저장
+  ↓
+ReservationCreatedEvent Publish
+  ↓
+Redpanda(Kafka)
+  ↓
+payment-service Consumer
+  ↓
+결제 처리
+  ↓
+PaymentCompletedEvent Publish
+  ↓
+notification-service Consumer
+  ↓
+알림 처리
+```
+
+---
+
+# Event Topics
+
+| Topic | Description |
+|---|---|
+| reservation-created | 예약 생성 이벤트 |
+| payment-completed | 결제 완료 이벤트 |
+
+---
+
+# Event-Driven 장점
+
+- 서비스 간 강한 결합 제거
+- 비동기 처리 가능
+- 확장성 증가
+- 장애 격리 가능
+
+---
+
+# 9. Kubernetes Operations
+
+# Namespace
+
+```text
+ticket-dev
+ticket-prod
+monitoring
+```
+
+---
+
+# Kubernetes Resources
+
+- Deployment
+- Service
+- Ingress
+- ConfigMap
+- Secret
+- HPA
+
+---
+
+# Ingress Routing
+
+```text
+/users → user-service
+/events → event-service
+/reservations → reservation-service
+/payments → payment-service
+/notifications → notification-service
+```
+
+---
+
+# Health Check
+
+모든 서비스는:
+
+- readinessProbe
+- livenessProbe
+
+를 적용하여 안정적인 운영 환경을 구성하였습니다.
+
+---
+
+# Example
+
+```yaml
+readinessProbe:
+  httpGet:
+    path: /actuator/health
+    port: 8087
+```
+
+---
+
+# ConfigMap
+
+```yaml
+SPRING_PROFILES_ACTIVE
+DB_HOST
+DB_PORT
+KAFKA_BOOTSTRAP_SERVERS
+REDIS_HOST
+```
+
+---
+
+# Secret
+
+```yaml
+DB_USERNAME
+DB_PASSWORD
+JWT_SECRET
+```
+
+---
+
+# 10. CI/CD Pipeline
+
+GitHub Actions 기반 자동 배포 환경 구축
+
+---
+
+# CI Flow
+
+```text
+Pull Request
+    ↓
+Build
+    ↓
+Test
+    ↓
+Verification
+```
+
+---
+
+# CD Flow
+
+```text
+Main Branch Merge
+    ↓
+Docker Build
+    ↓
+Docker Push
+    ↓
+kubectl apply
+    ↓
+Rolling Update
+```
+
+---
+
+# Image Tag Strategy
+
+```text
+latest
+dev-<commit-sha>
+prod-<commit-sha>
+```
+
+---
+
+# Rolling Update
+
+Kubernetes Deployment를 통해:
+
+- 무중단 배포
+- 점진적 Pod 교체
+
+수행
+
+---
+
+# Rollback
+
+배포 실패 시:
+
+```bash
+kubectl rollout undo deployment/reservation-service
+```
+
+---
+
+# 11. Monitoring & Logging
+
+# Monitoring Architecture
+
+```text
+Spring Boot Actuator
+        ↓
+Prometheus
+        ↓
+Grafana Dashboard
+```
+
+---
+
+# Logging Architecture
+
+```text
+Application Logs
+        ↓
+Promtail
+        ↓
+Loki
+        ↓
+Grafana
+```
+
+---
+
+# 수집 메트릭
+
+- Request Count
+- Error Rate
+- p95 Latency
+- CPU Usage
+- Memory Usage
+- Pod Restart Count
+- Kafka Consumer Errors
+- DB Connection Pool 상태
+
+---
+
+# Dashboard
+
+Grafana 기반:
+
+- Kubernetes 상태
+- API 응답 속도
+- Error Rate
+- Pod 상태
+- Kafka 상태
+
+모니터링
+
+---
+
+# 12. High Availability & Scaling
+
+# HPA
+
+CPU 사용량 기준 Auto Scaling 적용
+
+---
+
+# Scale-Out Example
+
+```text
+reservation-service
+
+1 Pod
+↓
+3 Pods
+↓
+5 Pods
+```
+
+---
+
+# Node Failure 대응
+
+Worker Node 장애 발생 시:
+
+```text
+Kubernetes Scheduler
+    ↓
+다른 Node에 Pod 재배치
+```
+
+---
+
+# Multi-AZ RDS
+
+AZ 장애 발생 시에도:
+
+- DB Failover 가능
+- 서비스 지속 가능
+
+---
+
+# 13. Performance Testing
+
+k6 기반 부하 테스트 수행
+
+---
+
+# 테스트 시나리오
+
+## Reservation API 집중 부하
+
+```text
+100 VUs
+300 VUs
+500 VUs
+1000 VUs
+```
+
+---
+
+# 테스트 결과
+
+| VUs | Result |
+|---|---|
+| 100 | 정상 처리 |
+| 300 | latency 증가 시작 |
+| 500 | payment-service DB 병목 발생 |
+| 1000 | HPA scale-out 발생 |
+
+---
+
+# 병목 분석
+
+# 1. DB Connection Saturation
+
+동시 요청 증가 시:
+
+- DB Connection Pool 부족
+- 응답 지연 증가
+
+---
+
+# 2. Kafka Consumer Lag
+
+Producer 속도를 Consumer가 따라가지 못함
+
+---
+
+# 3. CPU Resource Contention
+
+Worker Node 리소스 경쟁 발생
+
+---
+
+# 개선 결과
+
+- HPA 기반 Scale-Out 정상 동작
+- Pod 자동 증가 확인
+- 서비스 다운 없이 요청 처리 가능
+
+---
+
+# 14. 장애 대응 전략
+
+# Readiness Probe 실패
+
+```text
+트래픽 자동 차단
+```
+
+---
+
+# Pod 장애
+
+```text
+Kubernetes 자동 재시작
+```
+
+---
+
+# Node 장애
+
+```text
+다른 Worker Node로 Pod 재배치
+```
+
+---
+
+# 배포 실패
+
+```bash
+kubectl rollout undo
+```
+
+---
+
+# 로그 기반 분석
+
+- Loki
+- Grafana
+- kubectl logs
+
+활용
+
+---
+
+# 15. 트러블 슈팅
+
+# 1. DockerHub 인증 오류
+
+## 문제
+
+```text
+unauthorized: access token has insufficient scopes
+```
+
+---
+
+## 해결
+
+- Access Token 재발급
+- GitHub Secret 재설정
+
+---
+
+# 2. kubeconfig 권한 문제
+
+## 문제
+
+```text
+Unable to read /etc/rancher/k3s/k3s.yaml
+```
+
+---
+
+## 해결
+
+```bash
+mkdir -p ~/.kube
+sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+sudo chown ubuntu:ubuntu ~/.kube/config
+chmod 600 ~/.kube/config
+```
+
+---
+
+# 3. RDS 연결 실패
+
+## 원인
+
+- Security Group 설정 누락
+- Multi-AZ Subnet Group 미구성
+
+---
+
+## 해결
+
+- Multi-AZ Subnet Group 구성
+- EC2 → RDS 허용
+
+---
+
+# 4. Kafka Consumer 미동작
+
+## 원인
+
+- bootstrap-server 설정 오류
+- listener 설정 문제
+
+---
+
+## 해결
+
+- Kafka Listener 수정
+- bootstrap-server 재설정
+
+---
+
+# 16. 개선 방향
+
+# 개선
+
+- HikariCP 튜닝
+- Kafka Consumer 최적화
+- Redis 캐시 적극 활용
+--kafka 원자성 해결
+
+
+---
+
+
+# 17. 프로젝트 회고
+
+이번 프로젝트를 통해:
+
+- Kubernetes Cluster 운영
+- AWS Infrastructure 설계
+- Event-Driven Architecture
+- CI/CD 자동화
+- Observability 구축
+- 부하 테스트 및 병목 분석
+
+을 실제 운영 환경 수준으로 경험할 수 있었습니다.
+
+특히:
+
+- 단일 서버 구조에서 벗어나
+- Scale-Out 구조
+- 장애 복구 전략
+- 고가용성 구조
+
+까지 고려하며 Cloud-Native 시스템 설계 경험을 얻을 수 있었습니다.
