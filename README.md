@@ -900,7 +900,7 @@ chmod 600 ~/.kube/config
 - HikariCP 튜닝
 - Kafka Consumer 최적화
 - Redis 캐시 적극 활용
---kafka 원자성 해결
+--kafka 원자성 해결,outbox patter사용해보기
 
 
 ---
