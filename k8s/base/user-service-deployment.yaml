@@ -18,6 +18,13 @@ spec:
           image: kwonjunyeol/user-service:latest
           ports:
             - containerPort: 8081
+          resources:
+            requests:
+              cpu: "150m"
+              memory: "256Mi"
+            limits:
+              cpu: "400m"
+              memory: "512Mi"
           envFrom:
             - configMapRef:
                 name: ticket-platform-config
